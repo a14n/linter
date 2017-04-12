@@ -21,6 +21,7 @@ import 'package:linter/src/rules/avoid_positional_boolean_parameters.dart';
 import 'package:linter/src/rules/avoid_return_types_on_setters.dart';
 import 'package:linter/src/rules/avoid_returning_null.dart';
 import 'package:linter/src/rules/avoid_returning_this.dart';
+import 'package:linter/src/rules/avoid_shadowing.dart';
 import 'package:linter/src/rules/avoid_slow_async_io.dart';
 import 'package:linter/src/rules/avoid_types_on_closure_parameters.dart';
 import 'package:linter/src/rules/await_only_futures.dart';
@@ -113,6 +114,7 @@ void registerLintRules() {
     ..register(new AvoidReturningNull())
     ..register(new AvoidReturnTypesOnSetters())
     ..register(new AvoidReturningThis())
+    ..register(new AvoidShadowing())
     ..register(new AvoidSlowAsyncIo())
     ..register(new AwaitOnlyFutures())
     ..registerDefault(new CamelCaseTypes())
