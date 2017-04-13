@@ -43,9 +43,17 @@ class B extends A {
 }
 
 class C extends Object with A {
+  C(a, b); // OK
+
   mc() {
     var a; // LINT
     var b; // LINT
     var c; // OK
   }
+
+  mc1() => null; // OK
+  mc2(a) => null; // LINT
+  mc3([a]) => null; // LINT
+  mc4(a) => null; // LINT
+  mc5({c}) => null; // OK
 }

@@ -76,86 +76,105 @@ class _Visitor extends SimpleAstVisitor {
   _Visitor(this.rule);
 
   @override
-  visitVariableDeclarationStatement(VariableDeclarationStatement node) {
-    final variables = node.variables.variables;
+  visitFormalParameterList(FormalParameterList node) {
+    if (node.parameterElements.isEmpty) return;
+    if (node.parent is ConstructorDeclaration) return;
+    final library = node.parameterElements.first.library;
+    _visit(library, node, node.parameters, (p) => p.identifier.name);
+  }
 
+  @override
+  visitVariableDeclarationStatement(VariableDeclarationStatement node) {
+    final library = node.variables.variables.first.element.library;
+    _visit(library, node, node.variables.variables, (v) => v.name.name);
+  }
+
+  _visit<T extends AstNode>(LibraryElement library, final AstNode node,
+      List<T> nodesWithName, String getName(T node)) {
     AstNode current = node;
     while (current != null) {
       if (current is ClassDeclaration) {
-        _checkClass(current, variables);
+        _checkClass(current, nodesWithName, getName);
       }
-      if (current is FunctionExpression) {
-        _checkParameters(current.parameters, variables);
-      }
-      if (current is FunctionDeclaration) {
-        _checkParameters(current.functionExpression.parameters, variables);
-      }
-      if (current is FunctionDeclarationStatement) {
-        _checkParameters(
-            current.functionDeclaration.functionExpression.parameters,
-            variables);
-      }
-      if (current is MethodDeclaration) {
-        _checkParameters(current.parameters, variables);
+      if (node.parent != current) {
+        if (current is FunctionExpression) {
+          _checkParameters(current.parameters, nodesWithName, getName);
+        }
+        if (current is FunctionDeclaration) {
+          _checkParameters(
+              current.functionExpression.parameters, nodesWithName, getName);
+        }
+        if (current is FunctionDeclarationStatement) {
+          _checkParameters(
+              current.functionDeclaration.functionExpression.parameters,
+              nodesWithName,
+              getName);
+        }
+        if (current is MethodDeclaration) {
+          _checkParameters(current.parameters, nodesWithName, getName);
+        }
       }
       if (current.parent is Block) {
-        _checkParentBlock(current, variables);
+        _checkParentBlock(current, nodesWithName, getName);
       }
       current = current.parent;
       if (current == null) {
-        final library = node.variables.variables.first.element.library;
-        _checkLibrary(library, variables);
+        _checkLibrary(library, nodesWithName, getName);
       }
     }
   }
 
-  void _checkClass(
-      ClassDeclaration clazz, List<VariableDeclaration> variables) {
-    for (final variable in variables) {
-      final name = variable.name.name;
-      if (clazz.element.lookUpGetter(name, clazz.element.library) != null ||
-          clazz.element.lookUpMethod(name, clazz.element.library) != null)
-        rule.reportLint(variable);
+  void _checkClass<T extends AstNode>(
+      ClassDeclaration clazz, List<T> nodesWithName, String getName(T node)) {
+    for (final node in nodesWithName) {
+      final name = getName(node);
+      final getterWithSameName =
+          clazz.element.lookUpGetter(name, clazz.element.library);
+      final methodWithSameName =
+          clazz.element.lookUpMethod(name, clazz.element.library);
+      if (getterWithSameName != null || methodWithSameName != null)
+        rule.reportLint(node);
     }
   }
 
-  void _checkLibrary(
-      LibraryElement library, List<VariableDeclaration> variables) {
+  void _checkLibrary<T extends AstNode>(
+      LibraryElement library, List<T> nodesWithName, String getName(T node)) {
     final topLevelVariableNames = library.units
         .expand((u) => u.topLevelVariables)
         .map((e) => e.name)
         .toList();
     final functionNames =
         library.units.expand((u) => u.functions).map((e) => e.name).toList();
-    for (final variable in variables) {
-      final name = variable.name.name;
+    for (final node in nodesWithName) {
+      final name = getName(node);
       if (topLevelVariableNames.contains(name) ||
           functionNames.contains(name)) {
-        rule.reportLint(variable);
+        rule.reportLint(node);
       }
     }
   }
 
-  void _checkParameters(
-      FormalParameterList parameters, NodeList<VariableDeclaration> variables) {
+  void _checkParameters<T extends AstNode>(FormalParameterList parameters,
+      List<T> nodesWithName, String getName(T node)) {
     if (parameters == null) return;
 
     final parameterNames =
         parameters.parameterElements.map((e) => e.name).toList();
 
-    for (final variable in variables) {
-      final name = variable.name.name;
+    for (final node in nodesWithName) {
+      final name = getName(node);
       if (parameterNames.contains(name)) {
-        rule.reportLint(variable);
+        rule.reportLint(node);
       }
     }
   }
 
-  void _checkParentBlock(
-      AstNode node, NodeList<VariableDeclaration> variables) {
-    final block = node.parent as Block;
+  void _checkParentBlock<T extends AstNode>(
+      AstNode currentNode, List<T> nodesWithName, String getName(T node)) {
+    final block = currentNode.parent as Block;
     final names = <String>[];
-    for (final statement in block.statements.takeWhile((n) => n != node)) {
+    for (final statement
+        in block.statements.takeWhile((n) => n != currentNode)) {
       if (statement is VariableDeclarationStatement) {
         names.addAll(statement.variables.variables.map((e) => e.name.name));
       }
@@ -163,10 +182,10 @@ class _Visitor extends SimpleAstVisitor {
         names.add(statement.functionDeclaration.name.name);
       }
     }
-    for (final variable in variables) {
-      final name = variable.name.name;
+    for (final node in nodesWithName) {
+      final name = getName(node);
       if (names.contains(name)) {
-        rule.reportLint(variable);
+        rule.reportLint(node);
       }
     }
   }
