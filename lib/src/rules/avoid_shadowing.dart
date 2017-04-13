@@ -54,26 +54,50 @@ class B extends A {
 ```
 ''';
 
-class AvoidShadowing extends LintRule {
+class AvoidShadowingOnVariables extends LintRule {
   _Visitor _visitor;
 
-  AvoidShadowing()
+  AvoidShadowingOnVariables()
       : super(
-            name: 'avoid_shadowing',
+            name: 'avoid_shadowing_on_variables',
             description: desc,
             details: details,
             group: Group.errors) {
-    _visitor = new _Visitor(this);
+    _visitor = new _VisitorOnVariables(this);
   }
 
   @override
   AstVisitor getVisitor() => _visitor;
 }
 
-class _Visitor extends SimpleAstVisitor {
-  final LintRule rule;
+class AvoidShadowingOnParameters extends LintRule {
+  _Visitor _visitor;
 
-  _Visitor(this.rule);
+  AvoidShadowingOnParameters()
+      : super(
+            name: 'avoid_shadowing_on_parameters',
+            description: desc,
+            details: details,
+            group: Group.errors) {
+    _visitor = new _VisitorOnParameters(this);
+  }
+
+  @override
+  AstVisitor getVisitor() => _visitor;
+}
+
+class _VisitorOnVariables extends _Visitor {
+  _VisitorOnVariables(LintRule rule) : super(rule);
+
+  @override
+  visitVariableDeclarationStatement(VariableDeclarationStatement node) {
+    final library = node.variables.variables.first.element.library;
+    _visit(library, node, node.variables.variables, (v) => v.name.name);
+  }
+}
+
+class _VisitorOnParameters extends _Visitor {
+  _VisitorOnParameters(LintRule rule) : super(rule);
 
   @override
   visitFormalParameterList(FormalParameterList node) {
@@ -82,12 +106,12 @@ class _Visitor extends SimpleAstVisitor {
     final library = node.parameterElements.first.library;
     _visit(library, node, node.parameters, (p) => p.identifier.name);
   }
+}
 
-  @override
-  visitVariableDeclarationStatement(VariableDeclarationStatement node) {
-    final library = node.variables.variables.first.element.library;
-    _visit(library, node, node.variables.variables, (v) => v.name.name);
-  }
+abstract class _Visitor extends SimpleAstVisitor {
+  final LintRule rule;
+
+  _Visitor(this.rule);
 
   _visit<T extends AstNode>(LibraryElement library, final AstNode node,
       List<T> nodesWithName, String getName(T node)) {
