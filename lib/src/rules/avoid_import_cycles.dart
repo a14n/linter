@@ -3,7 +3,9 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/standard_resolution_map.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:linter/src/analyzer.dart';
 
 const _desc = r'Avoid import cycles.';
@@ -36,9 +38,23 @@ class _Visitor extends SimpleAstVisitor {
   @override
   visitImportDirective(ImportDirective node) {
     final currentLib = node.element.library;
-    final importedLib = node.uriElement.unit.element.library;
-    if (importedLib.importedLibraries.any((l) => l == currentLib)) {
-      rule.reportLint(node);
+    final checkedLibraries = <LibraryElement>[];
+    List<LibraryElement> libraries =
+        node?.uriElement?.unit?.element?.library?.importedLibraries;
+
+    if (libraries == null) return;
+
+    while (libraries.isNotEmpty) {
+      if (libraries.contains(currentLib)) {
+        rule.reportLint(node);
+        return;
+      }
+      checkedLibraries.addAll(libraries);
+      libraries = libraries
+          .expand((l) => l.importedLibraries)
+          .where((l) => l != null)
+          .where((l) => !checkedLibraries.contains(l))
+          .toList();
     }
   }
 }

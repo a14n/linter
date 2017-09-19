@@ -493,8 +493,9 @@ defineTests() {
             collectingOut.trim(),
             stringContainsInOrder([
               'l1.dart 1:1',
+              'l3.dart 1:1',
               'l2.dart 1:1',
-              '3 files analyzed, 2 issues found, in'
+              '4 files analyzed, 3 issues found, in'
             ]));
       });
     });
