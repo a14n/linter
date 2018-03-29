@@ -9,6 +9,7 @@ import 'package:linter/src/rules/always_put_required_named_parameters_first.dart
 import 'package:linter/src/rules/always_require_non_null_named_parameters.dart';
 import 'package:linter/src/rules/always_specify_types.dart';
 import 'package:linter/src/rules/annotate_overrides.dart';
+import 'package:linter/src/rules/avoid_access_on_null.dart';
 import 'package:linter/src/rules/avoid_annotating_with_dynamic.dart';
 import 'package:linter/src/rules/avoid_as.dart';
 import 'package:linter/src/rules/avoid_bool_literals_in_conditional_expressions.dart';
@@ -124,6 +125,7 @@ void registerLintRules() {
     ..register(new AlwaysRequireNonNullNamedParameters())
     ..register(new AlwaysSpecifyTypes())
     ..register(new AnnotateOverrides())
+    ..register(new AvoidAccessOnNull())
     ..register(new AvoidAnnotatingWithDynamic())
     ..register(new AvoidBoolLiteralsInConditionalExpressions())
     ..register(new AvoidTypesOnClosureParameters())
