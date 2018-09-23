@@ -23,6 +23,7 @@ import 'package:linter/src/rules/avoid_implementing_value_types.dart';
 import 'package:linter/src/rules/avoid_init_to_null.dart';
 import 'package:linter/src/rules/avoid_js_rounded_ints.dart';
 import 'package:linter/src/rules/avoid_null_checks_in_equality_operators.dart';
+import 'package:linter/src/rules/avoid_num.dart';
 import 'package:linter/src/rules/avoid_positional_boolean_parameters.dart';
 import 'package:linter/src/rules/avoid_private_typedef_functions.dart';
 import 'package:linter/src/rules/avoid_relative_lib_imports.dart';
@@ -155,6 +156,7 @@ void registerLintRules() {
     ..register(new AvoidInitToNull())
     ..register(new AvoidJsRoundedInts())
     ..register(new AvoidNullChecksInEqualityOperators())
+    ..register(new AvoidNum())
     ..register(new AvoidPositionalBooleanParameters())
     ..register(new AvoidPrivateTypedefFunctions())
     ..register(new AvoidRelativeLibImports())
