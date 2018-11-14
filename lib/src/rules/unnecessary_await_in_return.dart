@@ -90,12 +90,15 @@ class _Visitor extends SimpleAstVisitor<void> {
     } else {
       throw StateError('unexpected type');
     }
+
     if (returnType != null &&
         returnType.isDartAsyncFuture &&
         type.isAssignableTo(returnType)) {
       final returnTypeArgument =
           (returnType as ParameterizedType).typeArguments.first;
-      if (!returnTypeArgument.isDynamic && !returnTypeArgument.isObject) {
+      if (!returnTypeArgument.isDynamic &&
+          !returnTypeArgument.isObject &&
+          returnTypeArgument is! TypeParameterType) {
         rule.reportLintForToken((expression as AwaitExpression).awaitKeyword);
       }
     }

@@ -8,6 +8,7 @@ import 'dart:async';
 
 final future = Future.value(1);
 final futureFuture = Future<Future<int>>.value(Future<int>.value(1));
+final futureDynamic = Future.value();
 
 Future<int> f1a() async => await future; // LINT
 Future<int> f1b() async {
@@ -34,6 +35,11 @@ Future<Object> f5b() async {
   return await future; // OK
 }
 
+Future<T> f6a<T>() async => await futureDynamic; // OK
+Future<T> f6b<T>() async {
+  return await futureDynamic; // OK
+}
+
 class A {
   Future<int> f1a() async => await future; // LINT
   Future<int> f1b() async {
@@ -58,5 +64,10 @@ class A {
   Future<Object> f5a() async => await future; // OK
   Future<Object> f5b() async {
     return await future; // OK
+  }
+
+  Future<T> f6a<T>() async => await futureDynamic; // OK
+  Future<T> f6b<T>() async {
+    return await futureDynamic; // OK
   }
 }
