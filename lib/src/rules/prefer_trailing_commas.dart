@@ -5,9 +5,8 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
-import 'package:analyzer/dart/element/type.dart';
 import 'package:linter/src/analyzer.dart';
-import 'package:linter/src/util/dart_type_utilities.dart';
+import 'package:linter/src/util/flutter_utils.dart';
 
 const _desc = r'Perfer trailing commas.';
 
@@ -88,8 +87,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     } else if (node.argumentList.arguments.length == 1) {
       var arg = node.argumentList.arguments.first;
       if (arg is NamedExpression) arg = (arg as NamedExpression).expression;
-      if (_isWidget(node.staticType) &&
-              _isWidgetOrCollectionOfWidget(arg.staticType) ||
+      if (isWidgetType(node.staticType) && isWidgetProperty(arg.staticType) ||
           arg is InstanceCreationExpression &&
               arg.argumentList.arguments.isNotEmpty &&
               arg.argumentList.arguments.last.endToken?.next?.type ==
@@ -123,29 +121,6 @@ class _Visitor extends SimpleAstVisitor<void> {
         _lineOf(list.last.end) != _lineOf(list.owner.end)) {
       rule.reporter.reportErrorForOffset(rule.lintCode, list.last.end, 0);
     }
-  }
-
-  final _collectionInterfaces = <InterfaceTypeDefinition>[
-    InterfaceTypeDefinition('List', 'dart.core'),
-    InterfaceTypeDefinition('Map', 'dart.core'),
-    InterfaceTypeDefinition('LinkedHashMap', 'dart.collection'),
-    InterfaceTypeDefinition('Set', 'dart.core'),
-    InterfaceTypeDefinition('LinkedHashSet', 'dart.collection'),
-  ];
-
-  bool _isWidget(DartType type) =>
-      DartTypeUtilities.implementsInterface(type, 'Widget', '');
-
-  bool _isWidgetOrCollectionOfWidget(DartType type) {
-    if (_isWidget(type)) {
-      return true;
-    }
-    if (type is ParameterizedType &&
-        DartTypeUtilities.implementsAnyInterface(type, _collectionInterfaces)) {
-      return type.typeParameters.length == 1 &&
-          _isWidget(type.typeArguments.first);
-    }
-    return false;
   }
 
   int _lineOf(int offset) => lineInfo.getLocation(offset).lineNumber;
