@@ -115,6 +115,7 @@ import 'package:linter/src/rules/prefer_mixin.dart';
 import 'package:linter/src/rules/prefer_null_aware_operators.dart';
 import 'package:linter/src/rules/prefer_single_quotes.dart';
 import 'package:linter/src/rules/prefer_spread_collections.dart';
+import 'package:linter/src/rules/prefer_trailing_commas.dart';
 import 'package:linter/src/rules/prefer_typing_uninitialized_variables.dart';
 import 'package:linter/src/rules/prefer_void_to_null.dart';
 import 'package:linter/src/rules/provide_deprecation_message.dart';
@@ -270,6 +271,7 @@ void registerLintRules() {
     ..register(PreferNullAwareOperators())
     ..register(PreferSingleQuotes())
     ..register(PreferSpreadCollections())
+    ..register(PreferTrailingCommas())
     ..register(PreferTypingUninitializedVariables())
     ..register(PreferVoidToNull())
     ..register(ProvideDeprecationMessage())
